@@ -11,6 +11,7 @@
       <el-table :data="tasks" border>
         <el-table-column prop="id" label="Task ID" width="80" />
         <el-table-column prop="name" label="Task Name" />
+        <el-table-column prop="assignee_id" label="Assignee" width="120" />
         <el-table-column prop="status" label="Status" width="100">
           <template #default="{ row }">
             <el-tag :type="row.status === 'done' ? 'success' : 'warning'">{{ row.status }}</el-tag>
@@ -18,7 +19,12 @@
         </el-table-column>
         <el-table-column label="Action">
           <template #default="{ row }">
-            <el-button type="primary" size="small" @click="startLabeling(row)">Start Labeling</el-button>
+            <el-button v-if="!row.assignee_id" size="small" @click="claim(row)" :loading="claimingId === row.id">
+              Claim
+            </el-button>
+            <el-button type="primary" size="small" @click="startLabeling(row)" :disabled="row.assignee_id && row.assignee_id !== userId">
+              Start Labeling
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -31,10 +37,14 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { taskService } from '@/services/modules'
+import { useUserStore } from '@/store/user'
 
 const router = useRouter()
+const userStore = useUserStore()
 const tasks = ref<any[]>([])
 const loading = ref(false)
+const claimingId = ref<number | null>(null)
+const userId = Number(userStore.userInfo?.id || 0)
 
 const fetchTasks = async () => {
   loading.value = true
@@ -51,6 +61,19 @@ const fetchTasks = async () => {
 
 const startLabeling = (row: any) => {
   router.push({ path: '/annotation/workspace', query: { taskId: String(row.id) } })
+}
+
+const claim = async (row: any) => {
+  claimingId.value = row.id
+  try {
+    await taskService.claimTask(row.id)
+    ElMessage.success('领取成功')
+    await fetchTasks()
+  } catch (e) {
+    ElMessage.error('领取失败')
+  } finally {
+    claimingId.value = null
+  }
 }
 
 onMounted(() => {

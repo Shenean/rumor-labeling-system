@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Task, Sample, Annotation
 from app.utils.auth import token_required
+from sqlalchemy import or_
 
 
 bp = Blueprint('task', __name__)
@@ -31,7 +32,7 @@ def list_tasks(current_user):
         if assigned_to is not None:
             query = query.filter(Task.assignee_id == assigned_to)
     else:
-        query = query.filter(Task.assignee_id == current_user.id)
+        query = query.filter(or_(Task.assignee_id == current_user.id, Task.assignee_id.is_(None)))
 
     pagination = query.order_by(Task.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
@@ -251,4 +252,3 @@ def task_progress(current_user, task_id):
     total = Sample.query.filter_by(task_id=task.id).count()
     completed = Sample.query.filter(Sample.task_id == task.id, Sample.rumor_label.isnot(None), Sample.rumor_label != 'Unverified').count()
     return jsonify({'code': 200, 'message': '成功', 'data': {'total': total, 'completed': completed}})
-

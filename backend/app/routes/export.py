@@ -4,6 +4,7 @@ from app.models import Annotation, Sample, User, ReviewLog, ModelLog, Task, Even
 from app.utils.auth import token_required
 import pandas as pd
 import io
+import inspect
 
 bp = Blueprint('export', __name__)
 
@@ -17,11 +18,19 @@ def _send_excel(rows, filename, sheet_name):
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name=sheet_name)
     output.seek(0)
+    params = inspect.signature(send_file).parameters
+    if 'download_name' in params:
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name=filename
+        )
     return send_file(
         output,
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         as_attachment=True,
-        download_name=filename
+        attachment_filename=filename
     )
 
 

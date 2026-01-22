@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from app.config import Config
-from app.utils.auth import get_user_id_from_request
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -37,6 +36,7 @@ def create_app(config_class=Config):
         try:
             if request.path.startswith('/api'):
                 from app.models import OperationLog
+                from app.utils.auth import get_user_id_from_request
                 user_id = get_user_id_from_request()
                 log = OperationLog(
                     user_id=user_id,

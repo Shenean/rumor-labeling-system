@@ -32,11 +32,32 @@
       :page-size="pageSize"
       @current-change="fetchSamples"
     />
+
+    <el-dialog v-model="dialogVisible" title="新增样本" width="640px">
+      <el-form label-position="top">
+        <el-form-item label="内容">
+          <el-input v-model="form.content" type="textarea" :rows="6" />
+        </el-form-item>
+        <el-form-item label="来源">
+          <el-input v-model="form.source" />
+        </el-form-item>
+        <el-form-item label="语言">
+          <el-select v-model="form.language" style="width: 100%;">
+            <el-option label="中文" value="zh" />
+            <el-option label="英文" value="en" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="creating" @click="createSample">创建</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { sampleService } from '@/services/modules'
 
@@ -45,6 +66,13 @@ const tableData = ref<any[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
+const dialogVisible = ref(false)
+const creating = ref(false)
+const form = reactive({
+  content: '',
+  source: '',
+  language: 'zh'
+})
 
 const fetchSamples = async (p = page.value) => {
   page.value = p
@@ -77,7 +105,32 @@ const handleEdit = (row: any) => {
 }
 
 const handleAdd = () => {
-  ElMessage.info('新增样本尚未实现')
+  dialogVisible.value = true
+}
+
+const createSample = async () => {
+  if (!form.content) {
+    ElMessage.warning('请输入内容')
+    return
+  }
+  creating.value = true
+  try {
+    await sampleService.createSample({
+      content: form.content,
+      source: form.source,
+      language: form.language
+    })
+    ElMessage.success('创建成功')
+    dialogVisible.value = false
+    form.content = ''
+    form.source = ''
+    form.language = 'zh'
+    await fetchSamples(1)
+  } catch (e) {
+    ElMessage.error('创建失败')
+  } finally {
+    creating.value = false
+  }
 }
 
 onMounted(() => {

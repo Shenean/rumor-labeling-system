@@ -29,6 +29,12 @@ const routes = [
         component: () => import('@/views/sample/SampleList.vue')
       },
       {
+        path: 'tasks/assign',
+        name: 'TaskAssign',
+        component: () => import('@/views/task/TaskAssign.vue'),
+        meta: { roles: ['admin'] }
+      },
+      {
         path: 'annotation/tasks',
         name: 'TaskList',
         component: () => import('@/views/annotation/TaskList.vue')
@@ -44,9 +50,45 @@ const routes = [
         component: () => import('@/views/event/EventList.vue')
       },
       {
+        path: 'review/tasks',
+        name: 'TaskReviewList',
+        component: () => import('@/views/review/TaskReviewList.vue'),
+        meta: { roles: ['admin', 'reviewer'] }
+      },
+      {
+        path: 'review/tasks/:id',
+        name: 'TaskReviewDetail',
+        component: () => import('@/views/review/TaskReviewDetail.vue'),
+        meta: { roles: ['admin', 'reviewer'] }
+      },
+      {
+        path: 'review/events',
+        name: 'EventReviewList',
+        component: () => import('@/views/review/EventReviewList.vue'),
+        meta: { roles: ['admin', 'reviewer'] }
+      },
+      {
+        path: 'review/events/:id',
+        name: 'EventReviewDetail',
+        component: () => import('@/views/review/EventReviewDetail.vue'),
+        meta: { roles: ['admin', 'reviewer'] }
+      },
+      {
+        path: 'export',
+        name: 'Export',
+        component: () => import('@/views/export/Export.vue'),
+        meta: { roles: ['admin'] }
+      },
+      {
         path: 'system/users',
         name: 'UserList',
         component: () => import('@/views/system/UserList.vue'),
+        meta: { roles: ['admin'] }
+      },
+      {
+        path: 'system/settings',
+        name: 'SystemSettings',
+        component: () => import('@/views/system/Settings.vue'),
         meta: { roles: ['admin'] }
       }
     ]

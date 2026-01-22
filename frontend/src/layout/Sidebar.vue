@@ -22,6 +22,11 @@
       <template #title>{{ $t('menu.samples') }}</template>
     </el-menu-item>
 
+    <el-menu-item index="/tasks/assign" v-if="userStore.isAdmin">
+      <el-icon><Tickets /></el-icon>
+      <template #title>{{ $t('menu.tasks') }}</template>
+    </el-menu-item>
+
     <el-menu-item index="/annotation/tasks">
       <el-icon><EditPen /></el-icon>
       <template #title>{{ $t('menu.annotation') }}</template>
@@ -32,12 +37,19 @@
       <template #title>{{ $t('menu.events') }}</template>
     </el-menu-item>
 
+    <el-menu-item index="/review/tasks" v-if="userStore.isAdmin || userStore.role === 'reviewer'">
+      <el-icon><Finished /></el-icon>
+      <template #title>{{ $t('menu.review') }}</template>
+    </el-menu-item>
+
     <el-sub-menu index="/system" v-if="userStore.isAdmin">
       <template #title>
         <el-icon><Setting /></el-icon>
         <span>{{ $t('menu.system') }}</span>
       </template>
       <el-menu-item index="/system/users">{{ $t('menu.users') }}</el-menu-item>
+      <el-menu-item index="/system/settings">系统设置</el-menu-item>
+      <el-menu-item index="/export">{{ $t('menu.export') }}</el-menu-item>
     </el-sub-menu>
   </el-menu>
 </template>

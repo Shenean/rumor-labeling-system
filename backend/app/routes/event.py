@@ -9,7 +9,7 @@ bp = Blueprint('event', __name__)
 def _ensure_admin(current_user):
     return current_user.role == 'admin'
 
-@bp.route('/', methods=['GET'])
+@bp.route('', methods=['GET'])
 @token_required
 def get_events(current_user):
     events = Event.query.order_by(Event.created_at.desc()).all()
@@ -43,7 +43,7 @@ def get_event_detail(current_user, event_id):
     })
 
 
-@bp.route('/', methods=['POST'])
+@bp.route('', methods=['POST'])
 @token_required
 def create_event(current_user):
     if not _ensure_admin(current_user):

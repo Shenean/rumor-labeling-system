@@ -5,7 +5,7 @@ from app.utils.auth import token_required
 
 bp = Blueprint('sample', __name__)
 
-@bp.route('/', methods=['GET'])
+@bp.route('', methods=['GET'])
 @token_required
 def get_samples(current_user):
     page = request.args.get('page', 1, type=int)
@@ -42,7 +42,7 @@ def get_samples(current_user):
         }
     })
 
-@bp.route('/', methods=['POST'])
+@bp.route('', methods=['POST'])
 @token_required
 def create_sample(current_user):
     data = request.get_json()

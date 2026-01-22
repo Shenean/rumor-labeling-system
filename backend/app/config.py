@@ -6,3 +6,8 @@ class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'mysql+pymysql://root:password@localhost/rumor_system'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
