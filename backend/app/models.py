@@ -19,6 +19,7 @@ class Sample(db.Model):
     language = db.Column(db.String(20), default='zh')
     rumor_label = db.Column(db.String(20))
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'))
+    task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -46,6 +47,7 @@ class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200))
     description = db.Column(db.Text)
+    status = db.Column(db.String(20), default='active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -58,3 +60,33 @@ class ModelLog(db.Model):
     confidence = db.Column(db.Float)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     called_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class ReviewLog(db.Model):
+    __tablename__ = 'review_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    object_type = db.Column(db.String(20), nullable=False)
+    object_id = db.Column(db.Integer, nullable=False)
+    reviewer_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    approved = db.Column(db.Boolean, nullable=False)
+    comments = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Setting(db.Model):
+    __tablename__ = 'settings'
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False)
+    value = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class OperationLog(db.Model):
+    __tablename__ = 'operation_logs'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    method = db.Column(db.String(10))
+    path = db.Column(db.String(255))
+    status_code = db.Column(db.Integer)
+    query_string = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

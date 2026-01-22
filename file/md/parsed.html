@@ -1,0 +1,426 @@
+<p><a id="header"></a><a id="content"></a><a id="智能谣言标注系统后端接口设计方案"></a># 智能谣言标注系统后端接口设计方案</p>
+<p>本系统采用__RESTful__ 风格设计，每个接口对应一个资源，使用 HTTP 动词表示操作类型<a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=match%20at%20L67%20%E5%9C%A8RESTful%E6%9E%B6%E6%9E%84%E4%B8%AD%EF%BC%8C%E6%AF%8F%E4%B8%AA%E7%BD%91%E5%9D%80%E4%BB%A3%E8%A1%A8%E4%B8%80%E7%A7%8D%E8%B5%84%E6%BA%90%EF%BC%88resource%EF%BC%89%EF%BC%8C%E6%89%80%E4%BB%A5%E7%BD%91%E5%9D%80%E4%B8%AD%E4%B8%8D%E8%83%BD%E6%9C%89%E5%8A%A8%E8%AF%8D%EF%BC%8C%E5%8F%AA%E8%83%BD%E6%9C%89%E5%90%8D%E8%AF%8D%EF%BC%8C%E8%80%8C%E4%B8%94%E6%89%80%E7%94%A8%E7%9A%84%E5%90%8D%E8%AF%8D%E5%BE%80%E5%BE%80%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%90%8D%E5%AF%B9%E5%BA%94%E3%80%82%E4%B8%80%E8%88%AC%E6%9D%A5%E8%AF%B4%EF%BC%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E7%9A%84%20%E8%A1%A8%E9%83%BD%E6%98%AF%E5%90%8C%E7%A7%8D%E8%AE%B0%E5%BD%95%E7%9A%84">[1]</a><a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=%3E%20%20%20,DELETE%EF%BC%88DELETE%EF%BC%89%EF%BC%9A%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%A0%E9%99%A4%E8%B5%84%E6%BA%90%E3%80%82">[2]</a>。接口路径使用名词（一般为复数形式）表示资源，不在 URL 中使用动词<a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=match%20at%20L67%20%E5%9C%A8RESTful%E6%9E%B6%E6%9E%84%E4%B8%AD%EF%BC%8C%E6%AF%8F%E4%B8%AA%E7%BD%91%E5%9D%80%E4%BB%A3%E8%A1%A8%E4%B8%80%E7%A7%8D%E8%B5%84%E6%BA%90%EF%BC%88resource%EF%BC%89%EF%BC%8C%E6%89%80%E4%BB%A5%E7%BD%91%E5%9D%80%E4%B8%AD%E4%B8%8D%E8%83%BD%E6%9C%89%E5%8A%A8%E8%AF%8D%EF%BC%8C%E5%8F%AA%E8%83%BD%E6%9C%89%E5%90%8D%E8%AF%8D%EF%BC%8C%E8%80%8C%E4%B8%94%E6%89%80%E7%94%A8%E7%9A%84%E5%90%8D%E8%AF%8D%E5%BE%80%E5%BE%80%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%90%8D%E5%AF%B9%E5%BA%94%E3%80%82%E4%B8%80%E8%88%AC%E6%9D%A5%E8%AF%B4%EF%BC%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E7%9A%84%20%E8%A1%A8%E9%83%BD%E6%98%AF%E5%90%8C%E7%A7%8D%E8%AE%B0%E5%BD%95%E7%9A%84">[1]</a>。后端基于 Flask（Python 3.10）开发，通过 Flask 的蓝图(Blueprint)实现模块化组织，将不同功能划分到独立模块<a href="https://flask.palletsprojects.com/zh-cn/stable/blueprints/#:~:text=">[3]</a>。接口统一采用 JSON 格式交换数据，每个返回值采用统一结构（通常包括 code、message、data 等字段）。下文按功能模块分节，使用接口表格列出路径、方法、参数、返回结构和权限，并在表后详细说明各接口功能、前端交互场景及实现方法（如数据库操作、调用模型服务、数据校验、日志记录等）。</p>
+<p><a id="用户认证模块"></a>## 用户认证模块</p>
+<p>用户认证模块负责用户登录、登出、身份验证、当前用户信息获取等。所有请求需在请求头中携带 JWT 令牌（Token），登录接口返回 Token 供前端存储后续访问。使用 Flask-Login 或 JWT 扩展实现登录认证逻辑，登录成功后记录日志。</p>
+<p>功能</p>
+<p>路径</p>
+<p>方法</p>
+<p>请求参数</p>
+<p>返回结构</p>
+<p>权限</p>
+<p>用户登录</p>
+<p>/api/auth/login</p>
+<p>POST</p>
+<p>username(string)，password(string)</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;成功&quot;, &quot;data&quot;: { &quot;token&quot;:string, &quot;user&quot;:{...} } }</p>
+<p>公开</p>
+<p>获取当前用户信息</p>
+<p>/api/auth/user</p>
+<p>GET</p>
+<p>Header: Authorization: Bearer <token></p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;成功&quot;, &quot;data&quot;:{ &quot;id&quot;:int, &quot;username&quot;:string, &quot;role&quot;:string, ... } }</p>
+<p>登录用户</p>
+<p>用户登出</p>
+<p>/api/auth/logout</p>
+<p>POST</p>
+<p>Header: Authorization: Bearer <token></p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;已登出&quot; }</p>
+<p>登录用户</p>
+<p>刷新 Token</p>
+<p>/api/auth/refresh</p>
+<p>POST</p>
+<p>Header: Authorization: Bearer &lt;refresh_token&gt;</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;成功&quot;, &quot;data&quot;:{ &quot;token&quot;:string }}</p>
+<p>登录用户</p>
+<p>修改密码</p>
+<p>/api/auth/change_password</p>
+<p>PUT</p>
+<p>{ &quot;old_password&quot;:string, &quot;new_password&quot;:string }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;修改成功&quot; }</p>
+<p>登录用户</p>
+<p>用户注册 (可选)</p>
+<p>/api/auth/register</p>
+<p>POST</p>
+<p>{ &quot;username&quot;:string, &quot;password&quot;:string, &quot;role&quot;:string }</p>
+<p>{ &quot;code&quot;:201, &quot;message&quot;:&quot;创建成功&quot;, &quot;data&quot;:{ &quot;id&quot;:int, ... }}</p>
+<p>管理员</p>
+<ul>
+<li><strong>用户登录</strong>：前端登录页面提交用户名和密码到 /api/auth/login。后端校验参数格式（非空校验等），查询数据库验证用户凭证。若验证通过，生成 JWT 访问令牌（token）和可选的刷新令牌，返回给前端，并在服务器端记录登录日志<a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=%3E%20%20%20,DELETE%EF%BC%88DELETE%EF%BC%89%EF%BC%9A%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%A0%E9%99%A4%E8%B5%84%E6%BA%90%E3%80%82">[2]</a>。前端收到 token 后存储在本地（如 HTTPOnly Cookie 或 LocalStorage），用于后续请求的鉴权。失败返回错误码和信息。</li>
+<li><strong>获取当前用户信息</strong>：前端页面（如个人中心、左侧导航等）可调用此接口获取用户详情。后端从请求头中解析 JWT，验证有效性，查询用户表获取信息，并返回给前端（包括用户 ID、用户名、角色、权限等）。</li>
+<li><strong>用户登出</strong>：前端可调用此接口使后端作“登出”处理（如将当前 Token 加入黑名单）。也可直接在前端删除 Token。本接口实现时后端可记录日志并返回成功提示。</li>
+<li><strong>刷新 Token</strong>：当 Access Token 过期时，前端调用 /refresh 提供刷新令牌。后端校验刷新令牌合法并未过期，生成新的访问令牌返回。可结合单点登录或延长会话使用。</li>
+<li><strong>修改密码</strong>：在“修改密码”页面，前端提交旧密码和新密码到此接口。后端首先验证用户身份（JWT），然后检查旧密码是否正确（查询数据库），若正确则更新数据库中密码字段（需进行哈希加密），并返回成功信息，同时记录修改日志。失败时返回错误提示。</li>
+<li><strong>用户注册（可选）</strong>：若系统允许用户自行注册，则前端调用此接口提交注册信息。后端检查用户名是否已存在、密码强度等，插入用户表新记录，并指定默认角色（如“普通用户”）或由管理员指定。注册成功后可以直接返回登录或账号信息。注册一般仅对管理员开放或关闭。</li>
+</ul>
+<p>以上接口均在 auth 蓝图中实现。实现时注意对请求参数进行合法性校验、在必要场景下对敏感操作（登录失败、密码错误等）进行频次限制，并记录操作日志和异常日志。返回结构可统一使用 {code, message, data} 格式，code 可表示业务状态，message 提示信息。</p>
+<p><a id="样本管理模块"></a>## 样本管理模块</p>
+<p>样本管理模块用于对谣言或待标注文本样本进行增删查改，包括文本内容和相关元信息管理。前端提供样本列表、详情编辑、上传等功能，后端通过接口操作数据库的样本表。样本可包括字段如：id, content, source, published_time, label（真/谣言/待定）等。</p>
+<p>功能</p>
+<p>路径</p>
+<p>方法</p>
+<p>请求参数</p>
+<p>返回结构</p>
+<p>权限</p>
+<p>查询样本列表</p>
+<p>/api/samples</p>
+<p>GET</p>
+<p>可选查询参数：?page, limit, query等</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;items&quot;:[{...}], &quot;total&quot;:int } }</p>
+<p>登录用户</p>
+<p>获取样本详情</p>
+<p>/api/samples/{id}</p>
+<p>GET</p>
+<p>URL 参数 id（样本ID）</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { ...样本对象... } }</p>
+<p>登录用户</p>
+<p>新增样本</p>
+<p>/api/samples</p>
+<p>POST</p>
+<p>{ &quot;content&quot;:string, &quot;source&quot;:string, &quot;published_time&quot;:timestamp }</p>
+<p>{ &quot;code&quot;:201, &quot;message&quot;:&quot;创建成功&quot;, &quot;data&quot;: { &quot;id&quot;:int, ... } }</p>
+<p>管理员/标注员</p>
+<p>更新样本</p>
+<p>/api/samples/{id}</p>
+<p>PUT</p>
+<p>{ &quot;content&quot;:string, &quot;source&quot;:string, &quot;published_time&quot;:timestamp, &quot;label&quot;:string }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;更新成功&quot; }</p>
+<p>管理员/标注员</p>
+<p>删除样本</p>
+<p>/api/samples/{id}</p>
+<p>DELETE</p>
+<p>无</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;删除成功&quot; }</p>
+<p>管理员</p>
+<p>批量导入样本</p>
+<p>/api/samples/batch_import</p>
+<p>POST</p>
+<p>文件上传或 { &quot;samples&quot;: [ {..}, ... ] }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;导入完成&quot;, &quot;data&quot;:{ &quot;success&quot;:int, &quot;failed&quot;:int } }</p>
+<p>管理员</p>
+<ul>
+<li><strong>查询样本列表</strong>：前端在样本列表页调用。支持分页 (page, limit) 和简单模糊查询（如按内容关键字、来源、标签状态等筛选）。后端从请求参数解析分页和筛选条件，调用数据库（ORM）查询符合条件的样本记录。返回时包含样本列表和总记录数。此接口需校验用户是否登录，可对不同角色返回不同字段（如标注员只能看到未标注或分配给自己的样本）。</li>
+<li><strong>获取样本详情</strong>：前端在查看或编辑样本时调用。后端根据 URL 中的样本 ID 查询数据库对应记录并返回。返回内容包括样本完整信息。若用户无权访问，返回403。</li>
+<li><strong>新增样本</strong>：前端“添加样本”页面提交新样本数据（或通过文件批量导入）。后端进行数据校验（非空、长度等），然后插入数据库新记录，返回新样本的 ID。在实现时要注意防止重复提交，可检查相似内容或去重，也可以将新样本标记为未审核待审核。记录操作日志。通常仅管理员或内容运营人员可以添加样本，一般标注员无需直接增加样本，而是从任务中获取样本。</li>
+<li><strong>更新样本</strong>：前端编辑样本或标注时调用此接口，提交修改后的字段。后端验证权限（只有管理员或与任务相关的标注员才可更新），然后更新数据库记录。常见场景是填写或修改样本标签（label 字段）。更新后可触发日志记录和任务状态变更（如一旦标注，任务可检查是否完成）。</li>
+<li><strong>删除样本</strong>：前端可能提供删除功能来移除错误或重复的样本。后端删除数据库记录或标记软删除，并记录日志。真正删除前可能需要确认是否关联任务或事件，若有关联需提示或拒绝删除。</li>
+<li><strong>批量导入样本</strong>：前端可通过上传文件（CSV/JSON）批量添加样本。后端解析文件，逐条插入数据库或使用事务批量插入，并返回导入结果统计（成功条数、失败条数和失败原因）。实现时需注意文件解析的异常处理，以及对数据格式的校验。</li>
+</ul>
+<p>以上接口归属于 sample 蓝图模块。后端需对输入参数进行验证（例如使用 Marshmallow、pydantic 等），所有数据库操作（CRUD）使用事务机制，在发生错误时回滚。操作完成后写操作日志（记录用户、时间、操作内容），以便审计。</p>
+<p><a id="谣言检测模块"></a>## 谣言检测模块</p>
+<p>谣言检测模块对给定文本进行自动判断。前端提供“谣言检测”界面，用户输入或粘贴可疑文本，后端调用预训练的机器学习或深度学习模型进行预测，返回可信度和判断结果。</p>
+<p>功能</p>
+<p>路径</p>
+<p>方法</p>
+<p>请求参数</p>
+<p>返回结构</p>
+<p>权限</p>
+<p>执行谣言检测</p>
+<p>/api/detect</p>
+<p>POST</p>
+<p>{ &quot;text&quot;:string }</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;label&quot;:string, &quot;confidence&quot;:float, &quot;explanation&quot;:string } }</p>
+<p>登录用户</p>
+<p>检测历史查询</p>
+<p>/api/detect/history</p>
+<p>GET</p>
+<p>可选查询参数：?user_id, ?page等</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;items&quot;:[{&quot;text&quot;:..., &quot;label&quot;:..., &quot;confidence&quot;:..., &quot;time&quot;:...},...], &quot;total&quot;:int } }</p>
+<p>登录用户</p>
+<ul>
+<li><strong>执行谣言检测</strong>：前端表单提交一段文本到 /api/detect。后端接口首先验证输入（非空、长度限制等），然后调用后端谣言检测模型服务（可以是内部模型调用函数或调用独立的微服务）。模型输入文本后返回标签（如 “谣言”/“非谣言”）及置信度。后端将结果封装到 JSON 中返回给前端。后端还可将检测记录存入数据库（包含用户 ID、文本内容、结果、置信度和时间），以供查看检测历史或统计。应对模型调用异常情况进行容错，例如超时或错误时返回默认提示，并记录错误日志。</li>
+<li><strong>检测历史查询</strong>：前端如在个人历史记录页显示检测结果时调用。后端根据当前用户或传入的 user_id 从数据库查询该用户的历史检测记录，并支持分页。返回结果包含每次检测的输入文本、判定标签、置信度和时间戳等。仅展示查询用户自己的历史或管理员查看全员历史。</li>
+</ul>
+<p>接口属于 detection 蓝图模块。与模型服务的交互可以通过封装为服务层函数或使用 HTTP 调用，结果校验后返回。数据库操作用于保存检测记录，可选提供审计功能。所有调用过程应进行异常捕获并写入日志，以便排查问题。</p>
+<p><a id="任务调度与标注模块"></a>## 任务调度与标注模块</p>
+<p>该模块负责创建标注任务、分配任务给标注员、标注进度跟踪和提交标注结果等。任务通常包含一组待标注的样本。前端提供任务管理界面（任务列表、任务详情、领任务、提交标注等），后端实现任务对象的 CRUD 和标注流程控制。</p>
+<p>功能</p>
+<p>路径</p>
+<p>方法</p>
+<p>请求参数</p>
+<p>返回结构</p>
+<p>权限</p>
+<p>查询任务列表</p>
+<p>/api/tasks</p>
+<p>GET</p>
+<p>?page, ?limit, 可选 status、assigned_to 等</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;items&quot;:[{...}], &quot;total&quot;:int } }</p>
+<p>登录用户</p>
+<p>获取任务详情</p>
+<p>/api/tasks/{task_id}</p>
+<p>GET</p>
+<p>URL 参数 task_id</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { ...任务详细... } }</p>
+<p>登录用户</p>
+<p>创建新任务</p>
+<p>/api/tasks</p>
+<p>POST</p>
+<p>{ &quot;name&quot;:string, &quot;description&quot;:string, &quot;sample_ids&quot;:[int,...], &quot;assignees&quot;:[user_id,...] }</p>
+<p>{ &quot;code&quot;:201, &quot;message&quot;:&quot;创建成功&quot;, &quot;data&quot;:{ &quot;id&quot;:int } }</p>
+<p>管理员</p>
+<p>更新任务</p>
+<p>/api/tasks/{task_id}</p>
+<p>PUT</p>
+<p>{ &quot;name&quot;:string, &quot;description&quot;:string, &quot;assignees&quot;:[...], &quot;status&quot;:string }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;更新成功&quot; }</p>
+<p>管理员</p>
+<p>删除任务</p>
+<p>/api/tasks/{task_id}</p>
+<p>DELETE</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;删除成功&quot; }</p>
+<p>管理员</p>
+<p>领取任务</p>
+<p>/api/tasks/{task_id}/claim</p>
+<p>POST</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;领取成功&quot; }</p>
+<p>登录用户</p>
+<p>取消领取</p>
+<p>/api/tasks/{task_id}/unclaim</p>
+<p>POST</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;已取消领取&quot; }</p>
+<p>登录用户</p>
+<p>查询任务样本</p>
+<p>/api/tasks/{task_id}/samples</p>
+<p>GET</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: [ { &quot;id&quot;:int, &quot;content&quot;:string, &quot;label&quot;:string, ... }, ... ] }</p>
+<p>登录用户</p>
+<p>提交样本标注结果</p>
+<p>/api/tasks/{task_id}/samples/{sample_id}/label</p>
+<p>POST</p>
+<p>{ &quot;label&quot;:string, &quot;comments&quot;:string (可选) }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;标注提交成功&quot; }</p>
+<p>被分配标注员</p>
+<p>查看任务进度</p>
+<p>/api/tasks/{task_id}/progress</p>
+<p>GET</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;total&quot;:int, &quot;completed&quot;:int } }</p>
+<p>登录用户</p>
+<ul>
+<li><strong>查询任务列表</strong>：前端任务列表页面调用，支持分页和筛选（如按状态、任务创建者、分配给当前用户等）。后端解析参数，查询任务表，可根据用户角色不同返回对应列表：管理员可见所有任务，普通标注员只显示分配给自己的任务列表。返回项包括任务名称、描述、状态、创建时间、分配人员等简要信息。</li>
+<li><strong>获取任务详情</strong>：前端点击某一任务查看详情时调用。后端根据任务 ID 查询任务记录以及关联的样本列表和分配人员信息，并返回完整任务信息，包括任务名、说明、状态（如“未开始”、“进行中”、“已完成”）、创建人、分配者列表、发布时间等。</li>
+<li><strong>创建新任务</strong>：管理员在任务创建页面提交任务信息，包括任务名称、说明、指定样本列表（可为一组样本ID）及分配给哪些标注员。后端验证数据后插入任务记录和任务样本关联表，对 assignees 写入任务-用户关联。在实现时需检查给定的 sample_ids 是否存在且未被其它任务占用，然后使用事务插入相关表，并对新任务发起人和被分配人发送通知或邮件。创建成功后返回任务 ID。记录操作日志。</li>
+<li><strong>更新任务</strong>：管理员可更改任务名称、说明、分配人员或状态。后端更新任务记录相应字段和分配关系（可能涉及更新任务-用户关联表）。若修改分配人员，需通知新增或移除的标注员。若任务状态变更（如管理员标记任务完成或暂停），前端可刷新任务列表以呈现最新状态。</li>
+<li><strong>删除任务</strong>：管理员可删除不再需要的任务。后端首先检查任务是否可删（如有已标注数据，可能不能删除或需要先清除），然后删除任务表记录和关联表记录，记录日志。操作前可提示确认。</li>
+<li><strong>领取/取消领取任务</strong>：如果采用“标注员认领任务”模式，则在任务详情页提供按钮让普通用户领任务。前端调用 /claim 将当前用户添加到任务分配列表（若未加入）；后端检查任务状态（只能领取未开始任务），并在任务-用户关联表中添加记录。/unclaim 则移除该关联。实施时需事务保证数据一致，并返回相应提示。</li>
+<li><strong>查询任务样本</strong>：标注员在标注界面需看到任务内样本列表及已有标注（若多轮标注）。调用此接口后端返回该任务下所有样本信息及其当前标注状态（可为未标注、已标注等）。后端从任务-样本关联表和样本表联合查询。</li>
+<li><strong>提交样本标注结果</strong>：标注员对单个样本提交标注时调用。请求中包含标签结果（如“真实”或“谣言”）及可选备注。后端验证用户确实被分配在此任务上，然后在数据库的标注表中插入/更新该样本的标注结果，并更新任务进度（标注数+1）。可能还需更新样本表的 label 字段或将其移出待标注列表。记录标注日志。前端收到成功后可自动加载下一个样本。</li>
+<li><strong>查看任务进度</strong>：前端在任务详情页显示任务进度时调用。后端统计该任务下总样本数和已提交标注数，并返回这两个数字，以供绘制进度条。</li>
+</ul>
+<p>任务接口属于 task 蓝图模块。所有接口都需先检查登录状态并解析身份。对数据库的操作包括任务表、样本表、任务-样本关联表和任务-用户关联表的增删查改，需要使用事务保证一致性。如一个任务创建涉及多表插入，应在一个事务中完成。对重要操作（创建/更新/删除）需进行日志记录和异常捕获。通过 RESTful 风格，任务资源使用 /tasks 为基础路径，按照 HTTP 方法表征操作类型<a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=match%20at%20L67%20%E5%9C%A8RESTful%E6%9E%B6%E6%9E%84%E4%B8%AD%EF%BC%8C%E6%AF%8F%E4%B8%AA%E7%BD%91%E5%9D%80%E4%BB%A3%E8%A1%A8%E4%B8%80%E7%A7%8D%E8%B5%84%E6%BA%90%EF%BC%88resource%EF%BC%89%EF%BC%8C%E6%89%80%E4%BB%A5%E7%BD%91%E5%9D%80%E4%B8%AD%E4%B8%8D%E8%83%BD%E6%9C%89%E5%8A%A8%E8%AF%8D%EF%BC%8C%E5%8F%AA%E8%83%BD%E6%9C%89%E5%90%8D%E8%AF%8D%EF%BC%8C%E8%80%8C%E4%B8%94%E6%89%80%E7%94%A8%E7%9A%84%E5%90%8D%E8%AF%8D%E5%BE%80%E5%BE%80%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%90%8D%E5%AF%B9%E5%BA%94%E3%80%82%E4%B8%80%E8%88%AC%E6%9D%A5%E8%AF%B4%EF%BC%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E7%9A%84%20%E8%A1%A8%E9%83%BD%E6%98%AF%E5%90%8C%E7%A7%8D%E8%AE%B0%E5%BD%95%E7%9A%84">[1]</a><a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=%3E%20%20%20,DELETE%EF%BC%88DELETE%EF%BC%89%EF%BC%9A%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%A0%E9%99%A4%E8%B5%84%E6%BA%90%E3%80%82">[2]</a>。</p>
+<p><a id="事件聚合模块"></a>## 事件聚合模块</p>
+<p>事件聚合模块负责将相关的谣言样本或任务聚合为事件，以便分析和管理。事件通常代表同一主题或相互关联的一组样本/任务。前端提供事件列表、事件详情和创建事件等页面，后端管理事件资源及其关联。</p>
+<p>功能</p>
+<p>路径</p>
+<p>方法</p>
+<p>请求参数</p>
+<p>返回结构</p>
+<p>权限</p>
+<p>查询事件列表</p>
+<p>/api/events</p>
+<p>GET</p>
+<p>?page, ?limit, ?status, ?keyword等</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;items&quot;:[...], &quot;total&quot;:int } }</p>
+<p>登录用户</p>
+<p>获取事件详情</p>
+<p>/api/events/{id}</p>
+<p>GET</p>
+<p>URL 参数 id</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { ...事件对象... } }</p>
+<p>登录用户</p>
+<p>创建新事件</p>
+<p>/api/events</p>
+<p>POST</p>
+<p>{ &quot;name&quot;:string, &quot;description&quot;:string, &quot;sample_ids&quot;:[...], &quot;task_ids&quot;:[...] }</p>
+<p>{ &quot;code&quot;:201, &quot;message&quot;:&quot;创建成功&quot;, &quot;data&quot;:{ &quot;id&quot;:int }}</p>
+<p>管理员</p>
+<p>更新事件</p>
+<p>/api/events/{id}</p>
+<p>PUT</p>
+<p>{ &quot;name&quot;:string, &quot;description&quot;:string, &quot;status&quot;:string }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;更新成功&quot; }</p>
+<p>管理员</p>
+<p>删除事件</p>
+<p>/api/events/{id}</p>
+<p>DELETE</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;删除成功&quot; }</p>
+<p>管理员</p>
+<ul>
+<li><strong>查询事件列表</strong>：前端事件列表页调用，支持分页和搜索（根据事件名称、创建时间、状态等筛选）。后端从事件表中检索符合条件的记录，并返回事件概要（如事件名、状态、创建时间、关联样本数等）。根据用户角色返回可见事件（管理员看所有事件，普通用户可查看其参与的事件或公开事件）。</li>
+<li><strong>获取事件详情</strong>：前端查看某事件详细信息时调用。后端查询事件表获取基础信息，并查询事件关联的样本和任务列表（通过关联表）。返回数据包括事件名称、描述、状态、创建者、创建时间，以及关联的样本和任务详情（如每个样本的摘要或每个任务的名称）。</li>
+<li><strong>创建新事件</strong>：管理员在创建事件界面提交信息，包括事件名称、描述和要关联的样本或任务 ID 列表。后端验证样本/任务 ID 存在，然后在数据库中创建事件记录，并在事件-样本关联表和事件-任务关联表中插入关联。完成后返回事件 ID。创建过程需使用事务，保证主表和关联表数据一致。创建成功可能触发通知或将事件加载到聚合分析中。</li>
+<li><strong>更新事件</strong>：管理员可以修改事件的名称、描述或状态（如标记事件为“已闭合”）。后端更新事件记录的相关字段，并记录操作日志。若需修改关联内容，可提供单独接口（如添加/移除关联样本）或在此接口中扩展参数支持更新关联。</li>
+<li><strong>删除事件</strong>：管理员可删除不再需要的事件。后端删除事件记录及相关联记录，并记录日志。在删除前可能检查关联任务是否已完成或关联样本是否被其它任务引用，防止误删。</li>
+</ul>
+<p>事件模块使用 event 蓝图。接口实现时，事件聚合逻辑主要在后台完成，如基于内容相似度自动聚合。但在本接口设计中，主要提供手动管理接口。数据库操作涉及事件表及其关联表，使用事务确保多表操作安全。可对事件做权限控制（比如一般用户只能查看自己创建或参与的事件）。</p>
+<p><a id="审核模块"></a>## 审核模块</p>
+<p>审核模块负责对标注结果、事件分类等内容进行二次人工审核。通常包括列出待审核项、审核通过或驳回等操作。前端展示待审核任务或事件，审核员可以查看详情并给出审核意见。后端提供审核接口更新状态。</p>
+<p>功能</p>
+<p>路径</p>
+<p>方法</p>
+<p>请求参数</p>
+<p>返回结构</p>
+<p>权限</p>
+<p>查询待审核任务</p>
+<p>/api/review/tasks</p>
+<p>GET</p>
+<p>?page, ?limit</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;items&quot;:[...], &quot;total&quot;:int } }</p>
+<p>审核员</p>
+<p>审核任务详情</p>
+<p>/api/review/tasks/{task_id}</p>
+<p>GET</p>
+<p>URL 参数 task_id</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { ...任务内容及标注结果... } }</p>
+<p>审核员</p>
+<p>提交任务审核结果</p>
+<p>/api/review/tasks/{task_id}</p>
+<p>POST</p>
+<p>{ &quot;approved&quot;:bool, &quot;comments&quot;:string }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;操作成功&quot; }</p>
+<p>审核员</p>
+<p>查询待审核事件</p>
+<p>/api/review/events</p>
+<p>GET</p>
+<p>?page, ?limit</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;items&quot;:[...], &quot;total&quot;:int } }</p>
+<p>审核员</p>
+<p>审核事件详情</p>
+<p>/api/review/events/{id}</p>
+<p>GET</p>
+<p>URL 参数 id</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { ...事件信息... } }</p>
+<p>审核员</p>
+<p>提交事件审核结果</p>
+<p>/api/review/events/{id}</p>
+<p>POST</p>
+<p>{ &quot;approved&quot;:bool, &quot;comments&quot;:string }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;操作成功&quot; }</p>
+<p>审核员</p>
+<ul>
+<li><strong>查询待审核任务</strong>：审核角色登录后，前端调用此接口获得需要审核的任务列表，支持分页。后端过滤出状态为“待审核”的任务，并返回列表项，包括任务基本信息、分配标注员、提交的标注统计等。</li>
+<li><strong>审核任务详情</strong>：审核员查看某任务时调用。后端返回该任务的全部标注结果（可按样本汇总）、标注员完成情况等详情，让审核员逐一查看。</li>
+<li><strong>提交任务审核结果</strong>：审核员决定对某任务进行审批。请求体中 approved 表示通过（true）或驳回（false），comments 为审核意见。后端根据结果更新任务状态（如通过则标记为“已完成”，不通过则标记为“被驳回，需要重新标注”），记录审核意见和日志。若不通过，可通知原标注员重做。返回操作结果。</li>
+<li><strong>查询待审核事件</strong>：类似任务审核，返回待审核的事件列表，审核员可以选择处理。</li>
+<li><strong>审核事件详情</strong>：返回具体事件下的详情（关联样本/任务的信息、先前的处理情况等），方便审核员判断。</li>
+<li><strong>提交事件审核结果</strong>：审核员对事件进行批准或驳回，并添加评语。后端更新事件状态（如“已验证”或“驳回待修正”）并记录日志。</li>
+</ul>
+<p>审核接口位于 review 蓝图模块。实现时需校验操作用户为审核角色，且避免普通用户访问。后端在审核通过后需对原对象（任务或事件）状态进行更新，并写入审核日志表以存储审核历史。所有审核操作应记录执行人、时间、结果和意见。</p>
+<p><a id="导出模块"></a>## 导出模块</p>
+<p>导出模块为前端提供将数据导出为文件的功能，常用于生成报告或数据备份。可导出的内容包括样本数据、标注结果、审核记录、统计报表等。前端提供导出选项（通常通过按钮触发导出任务），后端将生成可下载的文件（如 CSV、JSON）或提供下载链接。</p>
+<p>功能</p>
+<p>路径</p>
+<p>方法</p>
+<p>请求参数</p>
+<p>返回结构</p>
+<p>权限</p>
+<p>导出样本数据</p>
+<p>/api/export/samples</p>
+<p>GET</p>
+<p>可选筛选参数（如日期范围、标签类型）</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;url&quot;: string } }</p>
+<p>管理员</p>
+<p>导出标注结果</p>
+<p>/api/export/annotations</p>
+<p>GET</p>
+<p>筛选参数（任务ID、日期范围等）</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;url&quot;: string } }</p>
+<p>管理员</p>
+<p>导出审核记录</p>
+<p>/api/export/audits</p>
+<p>GET</p>
+<p>筛选参数（日期范围、审核员等）</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;url&quot;: string } }</p>
+<p>管理员</p>
+<p>导出统计报表</p>
+<p>/api/export/reports</p>
+<p>POST</p>
+<p>{ &quot;type&quot;:string, &quot;params&quot;:{...} }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;报表生成成功&quot;, &quot;data&quot;:{ &quot;file_url&quot;: string } }</p>
+<p>管理员</p>
+<ul>
+<li><strong>导出样本数据</strong>：前端在导出页面选择“导出样本”并可能选择筛选条件后调用。后端根据条件查询样本表数据，将结果写入 CSV（或 Excel/JSON）文件。可以同步生成并立即返回文件链接，也可异步生成（返回任务ID，前端轮询完成）。此处以同步方式为例：后端生成文件并存储在文件服务器或云存储，然后返回该文件的下载 URL。前端接收后触发下载或跳转到链接。生成过程需对查询到的数据进行清洗（如去除敏感信息）、分页导出防止内存过大。</li>
+<li><strong>导出标注结果</strong>：类似导出样本，但查询标注表或关联任务表，导出任务或样本的标注结果列表。返回文件下载地址。</li>
+<li><strong>导出审核记录</strong>：导出所有或筛选条件下的审核历史，供审计使用。查询审核日志表并导出，返回文件链接。</li>
+<li><strong>导出统计报表</strong>：根据前端指定的报表类型（例如“日活跃量”、“谣言检出率”）和参数，后端生成统计数据并导成文件。此接口用 POST，因为请求体中通常包含报表类型和时间范围等。生成后返回文件地址。可以使用后台任务队列异步处理（例如 Celery），并返回结果链接。</li>
+</ul>
+<p>导出接口在 export 蓝图。实现时应注意权限控制（一般仅管理员可导出全量数据），并对导出数据量、文件大小进行限制。日志记录导出操作以备留痕。返回结构中 url 或 file_url 应指向可安全下载的文件链接，链接可设置有效期。通常 HTTP 状态为 200，下载链接在 data 字段返回。</p>
+<p><a id="系统设置模块"></a>## 系统设置模块</p>
+<p>系统设置模块用于管理整体系统配置和基础数据，包括角色权限管理、系统参数、操作日志查看等。前端有“设置”页面，后端提供 CRUD 接口管理系统级信息。</p>
+<p>功能</p>
+<p>路径</p>
+<p>方法</p>
+<p>请求参数</p>
+<p>返回结构</p>
+<p>权限</p>
+<p>查询系统配置</p>
+<p>/api/settings/config</p>
+<p>GET</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { ...各项系统参数... } }</p>
+<p>管理员</p>
+<p>更新系统配置</p>
+<p>/api/settings/config</p>
+<p>PUT</p>
+<p>{ &quot;param1&quot;:value, &quot;param2&quot;:value, ... }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;保存成功&quot; }</p>
+<p>管理员</p>
+<p>查询角色列表</p>
+<p>/api/settings/roles</p>
+<p>GET</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: [ { &quot;id&quot;:int, &quot;name&quot;:string, ... }, ... ] }</p>
+<p>管理员</p>
+<p>创建角色</p>
+<p>/api/settings/roles</p>
+<p>POST</p>
+<p>{ &quot;name&quot;:string, &quot;permissions&quot;:[... ] }</p>
+<p>{ &quot;code&quot;:201, &quot;message&quot;:&quot;创建成功&quot;, &quot;data&quot;:{ &quot;id&quot;:int } }</p>
+<p>管理员</p>
+<p>更新角色</p>
+<p>/api/settings/roles/{id}</p>
+<p>PUT</p>
+<p>{ &quot;name&quot;:string, &quot;permissions&quot;:[... ] }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;更新成功&quot; }</p>
+<p>管理员</p>
+<p>删除角色</p>
+<p>/api/settings/roles/{id}</p>
+<p>DELETE</p>
+<p>—</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;删除成功&quot; }</p>
+<p>管理员</p>
+<p>查询用户列表</p>
+<p>/api/settings/users</p>
+<p>GET</p>
+<p>?page, ?limit</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;items&quot;:[...], &quot;total&quot;:int } }</p>
+<p>管理员</p>
+<p>更新用户角色</p>
+<p>/api/settings/users/{id}/roles</p>
+<p>PUT</p>
+<p>{ &quot;roles&quot;:[role_id, ...] }</p>
+<p>{ &quot;code&quot;:200, &quot;message&quot;:&quot;更新成功&quot; }</p>
+<p>管理员</p>
+<p>查询操作日志</p>
+<p>/api/settings/logs</p>
+<p>GET</p>
+<p>筛选：?user_id, ?action, ?date_from/to</p>
+<p>{ &quot;code&quot;:200, &quot;data&quot;: { &quot;items&quot;:[...], &quot;total&quot;:int } }</p>
+<p>管理员</p>
+<ul>
+<li><strong>系统配置</strong>：系统有一组全局参数（例如检测置信度阈值、分页默认大小等）。前端设置页面可查询并修改这些参数。GET /settings/config 返回所有配置项；PUT /settings/config 接收一个 JSON 对象，包含要更新的参数及其值，后端验证并保存（可存储在数据库或配置文件中）。更新后可能需要立即生效或通知各模块。</li>
+<li><strong>角色管理</strong>：管理员可以增删改系统角色。GET /roles 获取所有角色列表（含角色名称、权限描述）；POST /roles 创建新角色并指定权限集合；PUT /roles/{id} 修改角色名或权限；DELETE /roles/{id} 删除角色。权限可以细分至具体接口或功能点，由权限表维护。修改角色时后端更新相应表，并将角色变更记录下来。</li>
+<li><strong>用户管理</strong>：管理员可以查看所有用户列表（GET /users），并为用户分配角色（PUT /users/{id}/roles）。前端可在用户管理页面修改用户所属角色。后端对应地更新用户-角色关联表。</li>
+<li><strong>操作日志</strong>：系统将用户在各模块的操作记录下来，以便审计。前端可在“日志”界面查看。GET /settings/logs 支持根据用户、操作类型或时间范围过滤，后端查询日志表并返回结果。日志表至少包含操作用户、时间、模块、接口、输入参数、操作结果等信息。</li>
+</ul>
+<p>此模块使用 settings 蓝图。配置参数可设计为独立的配置表，使用事务更新；角色权限和用户角色操作均操作相关数据库表。系统设置接口一律对管理员开放，确保普通用户不可访问。所有设置操作均需记录到日志表，包括操作者、修改项和时间，以保证可追溯性。</p>
+<p><strong>总结：</strong> 本后端设计方案对各模块接口进行了详细规划。每个接口遵循 RESTful 规范<a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=match%20at%20L67%20%E5%9C%A8RESTful%E6%9E%B6%E6%9E%84%E4%B8%AD%EF%BC%8C%E6%AF%8F%E4%B8%AA%E7%BD%91%E5%9D%80%E4%BB%A3%E8%A1%A8%E4%B8%80%E7%A7%8D%E8%B5%84%E6%BA%90%EF%BC%88resource%EF%BC%89%EF%BC%8C%E6%89%80%E4%BB%A5%E7%BD%91%E5%9D%80%E4%B8%AD%E4%B8%8D%E8%83%BD%E6%9C%89%E5%8A%A8%E8%AF%8D%EF%BC%8C%E5%8F%AA%E8%83%BD%E6%9C%89%E5%90%8D%E8%AF%8D%EF%BC%8C%E8%80%8C%E4%B8%94%E6%89%80%E7%94%A8%E7%9A%84%E5%90%8D%E8%AF%8D%E5%BE%80%E5%BE%80%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%90%8D%E5%AF%B9%E5%BA%94%E3%80%82%E4%B8%80%E8%88%AC%E6%9D%A5%E8%AF%B4%EF%BC%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E7%9A%84%20%E8%A1%A8%E9%83%BD%E6%98%AF%E5%90%8C%E7%A7%8D%E8%AE%B0%E5%BD%95%E7%9A%84">[1]</a><a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=%3E%20%20%20,DELETE%EF%BC%88DELETE%EF%BC%89%EF%BC%9A%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%A0%E9%99%A4%E8%B5%84%E6%BA%90%E3%80%82">[2]</a>，使用清晰的资源路径和 HTTP 方法，并在实现时进行输入校验、数据库操作和日志记录。各蓝图模块（如 auth、sample、detection、task、event、review、export、settings）分别承担不同功能，使代码结构清晰可维护<a href="https://flask.palletsprojects.com/zh-cn/stable/blueprints/#:~:text=">[3]</a>。权限控制上，通过用户角色区分可访问接口，保护敏感操作。前端根据页面功能调用对应接口，实现整体功能流程的完整交互。上述设计未给出具体代码，但已描述了各接口的实现思路，如调用谣言检测模型服务、使用 ORM 进行数据库 CRUD、数据校验以及日志记录等，确保系统运行的业务逻辑和安全性。</p>
+<p><strong>参考文献：</strong> RESTful API 设计规范<a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=match%20at%20L67%20%E5%9C%A8RESTful%E6%9E%B6%E6%9E%84%E4%B8%AD%EF%BC%8C%E6%AF%8F%E4%B8%AA%E7%BD%91%E5%9D%80%E4%BB%A3%E8%A1%A8%E4%B8%80%E7%A7%8D%E8%B5%84%E6%BA%90%EF%BC%88resource%EF%BC%89%EF%BC%8C%E6%89%80%E4%BB%A5%E7%BD%91%E5%9D%80%E4%B8%AD%E4%B8%8D%E8%83%BD%E6%9C%89%E5%8A%A8%E8%AF%8D%EF%BC%8C%E5%8F%AA%E8%83%BD%E6%9C%89%E5%90%8D%E8%AF%8D%EF%BC%8C%E8%80%8C%E4%B8%94%E6%89%80%E7%94%A8%E7%9A%84%E5%90%8D%E8%AF%8D%E5%BE%80%E5%BE%80%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%90%8D%E5%AF%B9%E5%BA%94%E3%80%82%E4%B8%80%E8%88%AC%E6%9D%A5%E8%AF%B4%EF%BC%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E7%9A%84%20%E8%A1%A8%E9%83%BD%E6%98%AF%E5%90%8C%E7%A7%8D%E8%AE%B0%E5%BD%95%E7%9A%84">[1]</a><a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=%3E%20%20%20,DELETE%EF%BC%88DELETE%EF%BC%89%EF%BC%9A%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%A0%E9%99%A4%E8%B5%84%E6%BA%90%E3%80%82">[2]</a>；Flask 蓝图模块化设计<a href="https://flask.palletsprojects.com/zh-cn/stable/blueprints/#:~:text=">[3]</a>。</p>
+<p><a id="citations"></a><a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=match%20at%20L67%20%E5%9C%A8RESTful%E6%9E%B6%E6%9E%84%E4%B8%AD%EF%BC%8C%E6%AF%8F%E4%B8%AA%E7%BD%91%E5%9D%80%E4%BB%A3%E8%A1%A8%E4%B8%80%E7%A7%8D%E8%B5%84%E6%BA%90%EF%BC%88resource%EF%BC%89%EF%BC%8C%E6%89%80%E4%BB%A5%E7%BD%91%E5%9D%80%E4%B8%AD%E4%B8%8D%E8%83%BD%E6%9C%89%E5%8A%A8%E8%AF%8D%EF%BC%8C%E5%8F%AA%E8%83%BD%E6%9C%89%E5%90%8D%E8%AF%8D%EF%BC%8C%E8%80%8C%E4%B8%94%E6%89%80%E7%94%A8%E7%9A%84%E5%90%8D%E8%AF%8D%E5%BE%80%E5%BE%80%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E8%A1%A8%E6%A0%BC%E5%90%8D%E5%AF%B9%E5%BA%94%E3%80%82%E4%B8%80%E8%88%AC%E6%9D%A5%E8%AF%B4%EF%BC%8C%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%AD%E7%9A%84%20%E8%A1%A8%E9%83%BD%E6%98%AF%E5%90%8C%E7%A7%8D%E8%AE%B0%E5%BD%95%E7%9A%84">[1]</a> <a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html#:~:text=%3E%20%20%20,DELETE%EF%BC%88DELETE%EF%BC%89%EF%BC%9A%E4%BB%8E%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%88%A0%E9%99%A4%E8%B5%84%E6%BA%90%E3%80%82">[2]</a> RESTful API 设计指南 - 阮一峰的网络日志</p>
+<p><a href="https://www.ruanyifeng.com/blog/2014/05/restful_api.html">https://www.ruanyifeng.com/blog/2014/05/restful_api.html</a></p>
+<p><a href="https://flask.palletsprojects.com/zh-cn/stable/blueprints/#:~:text=">[3]</a> 使用蓝图模块化应用 — Flask Documentation (3.1.x)</p>
+<p><a href="https://flask.palletsprojects.com/zh-cn/stable/blueprints/">https://flask.palletsprojects.com/zh-cn/stable/blueprints/</a></p>

@@ -4,7 +4,7 @@
       <template #header>
         <div class="header">
           <span>My Annotation Tasks</span>
-          <el-button type="primary">Refresh</el-button>
+          <el-button type="primary" @click="fetchTasks" :loading="loading">Refresh</el-button>
         </div>
       </template>
       
@@ -17,8 +17,8 @@
           </template>
         </el-table-column>
         <el-table-column label="Action">
-          <template #default>
-            <el-button type="primary" size="small" @click="$router.push('/annotation/workspace')">Start Labeling</el-button>
+          <template #default="{ row }">
+            <el-button type="primary" size="small" @click="startLabeling(row)">Start Labeling</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -27,10 +27,35 @@
 </template>
 
 <script setup lang="ts">
-const tasks = [
-  { id: 101, name: 'Batch #1 Weibo Data', status: 'pending' },
-  { id: 102, name: 'Batch #2 Twitter Data', status: 'done' },
-]
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import { taskService } from '@/services/modules'
+
+const router = useRouter()
+const tasks = ref<any[]>([])
+const loading = ref(false)
+
+const fetchTasks = async () => {
+  loading.value = true
+  try {
+    const res: any = await taskService.getTasks({ page: 1, limit: 50 })
+    const data = res?.data?.data || res?.data
+    tasks.value = data.items || []
+  } catch (e) {
+    ElMessage.error('加载任务失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const startLabeling = (row: any) => {
+  router.push({ path: '/annotation/workspace', query: { taskId: String(row.id) } })
+}
+
+onMounted(() => {
+  fetchTasks()
+})
 </script>
 
 <style scoped>

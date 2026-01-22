@@ -50,8 +50,9 @@ const handleLogin = async () => {
   loading.value = true
   try {
     const res: any = await authService.login(form)
-    userStore.setToken(res.data.token)
-    userStore.setUserInfo(res.data.user)
+    const payload = res?.data?.data || res?.data
+    userStore.setToken(payload.token)
+    userStore.setUserInfo(payload.user)
     ElMessage.success('Login Success')
     router.push('/dashboard')
   } catch (error) {

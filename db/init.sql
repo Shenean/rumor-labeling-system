@@ -14,22 +14,10 @@ CREATE TABLE IF NOT EXISTS events (
     id INT AUTO_INCREMENT PRIMARY KEY COMMENT '事件ID',
     title VARCHAR(200) COMMENT '事件标题或主题',
     description TEXT COMMENT '事件描述 (可选)',
+    status VARCHAR(20) DEFAULT 'active' COMMENT '事件状态 (如 active / pending_review / approved / rejected)',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='事件表';
-
--- 样本表
-CREATE TABLE IF NOT EXISTS samples (
-    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '样本ID',
-    content TEXT NOT NULL COMMENT '文本内容',
-    source VARCHAR(100) COMMENT '来源平台或来源描述',
-    language VARCHAR(20) DEFAULT 'zh' COMMENT '文本语言 (如 zh / en)',
-    rumor_label VARCHAR(20) COMMENT '模型预测或自动标注标签 (真/假/待验证)',
-    event_id INT COMMENT '关联事件ID (外键, 指向事件表)',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='样本表';
 
 -- 任务表
 CREATE TABLE IF NOT EXISTS tasks (
@@ -42,6 +30,21 @@ CREATE TABLE IF NOT EXISTS tasks (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     FOREIGN KEY (assignee_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='任务表';
+
+-- 样本表
+CREATE TABLE IF NOT EXISTS samples (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '样本ID',
+    content TEXT NOT NULL COMMENT '文本内容',
+    source VARCHAR(100) COMMENT '来源平台或来源描述',
+    language VARCHAR(20) DEFAULT 'zh' COMMENT '文本语言 (如 zh / en)',
+    rumor_label VARCHAR(20) COMMENT '模型预测或自动标注标签 (真/假/待验证)',
+    event_id INT COMMENT '关联事件ID (外键, 指向事件表)',
+    task_id INT COMMENT '关联任务ID (外键, 指向任务表)',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL,
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='样本表';
 
 -- 标注记录表
 CREATE TABLE IF NOT EXISTS annotations (
@@ -66,3 +69,35 @@ CREATE TABLE IF NOT EXISTS model_logs (
     called_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '调用时间',
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='模型调用日志表';
+
+-- 审核日志表
+CREATE TABLE IF NOT EXISTS review_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '审核日志ID',
+    object_type VARCHAR(20) NOT NULL COMMENT '对象类型 (task / event)',
+    object_id INT NOT NULL COMMENT '对象ID',
+    reviewer_id INT NOT NULL COMMENT '审核员用户ID (外键, 指向用户表)',
+    approved TINYINT(1) NOT NULL COMMENT '是否通过',
+    comments TEXT COMMENT '审核意见',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '审核时间',
+    FOREIGN KEY (reviewer_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='审核日志表';
+
+-- 系统配置表
+CREATE TABLE IF NOT EXISTS settings (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '配置ID',
+    `key` VARCHAR(100) NOT NULL UNIQUE COMMENT '配置键',
+    `value` TEXT COMMENT '配置值',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='系统配置表';
+
+-- 操作日志表
+CREATE TABLE IF NOT EXISTS operation_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '日志ID',
+    user_id INT COMMENT '用户ID (外键)',
+    method VARCHAR(10) COMMENT 'HTTP 方法',
+    path VARCHAR(255) COMMENT '请求路径',
+    status_code INT COMMENT '响应状态码',
+    query_string TEXT COMMENT '查询参数',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '记录时间',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='操作日志表';

@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app import db
 from app.models import Task, Sample, Annotation
 from app.utils.auth import token_required
+from app.utils.response import ok, fail
 
 bp = Blueprint('annotate', __name__)
 
@@ -35,17 +36,17 @@ def get_tasks(current_user):
                 'sample_id': s.id
             })
             
-    return jsonify({'tasks': task_list})
+    return ok({'items': task_list, 'total': len(task_list)})
 
 @bp.route('/submit', methods=['POST'])
 @token_required
 def submit_annotation(current_user):
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
     sample_id = data.get('sample_id')
     label = data.get('label')
     
     if not sample_id or not label:
-        return jsonify({'message': 'Missing data'}), 400
+        return fail('缺少必要参数', http_status=400)
         
     # Save annotation
     annotation = Annotation(
@@ -63,4 +64,4 @@ def submit_annotation(current_user):
         
     db.session.commit()
     
-    return jsonify({'message': 'Annotation submitted'})
+    return ok(None, message='标注提交成功')

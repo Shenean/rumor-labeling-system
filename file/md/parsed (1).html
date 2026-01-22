@@ -1,0 +1,97 @@
+<p><a id="header"></a><a id="content"></a><a id="登录与鉴权页面"></a># 登录与鉴权页面</p>
+<ul>
+<li><strong>功能定位</strong>：系统所有功能的入口，提供用户登录并获取访问权限（如 JWT 令牌）<a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=%E6%8A%80%E6%9C%AF%E6%A0%88">[1]</a>。</li>
+<li><strong>主要内容</strong>：用户名/密码输入框、登录按钮、必要的第三方登录选项。</li>
+<li><strong>用户操作路径</strong>：用户在此输入凭证并提交表单，前端调用后端登录接口进行身份验证，成功后获得 Token 并存储（如 Cookie/LocalStorage）<a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=%E6%8A%80%E6%9C%AF%E6%A0%88">[1]</a>。</li>
+<li><strong>前后端交互</strong>：前端向后端发送登录请求，后端返回认证信息（Token）。登录成功后，前端使用 Token 访问后续受保护接口。</li>
+<li><strong>权限控制</strong>：所有用户均可访问该页；登录后根据角色决定后续页面权限。</li>
+</ul>
+<p><a id="仪表盘dashboard"></a>## 仪表盘（Dashboard）</p>
+<ul>
+<li><strong>功能定位</strong>：管理员或普通用户登录后的首页，总览系统状态和关键指标<a href="https://ppanel.dev/zh/admin/dashboard#:~:text=Dashboard%20%E4%BB%AA%E8%A1%A8%E7%9B%98">[2]</a>。</li>
+<li><strong>主要内容</strong>：展示统计卡片（如待处理任务数、已标注样本数、事件数量等）、可视化图表（如每日标注量折线图、谣言/非谣言比例图等）<a href="https://ppanel.dev/zh/admin/dashboard#:~:text=Dashboard%20%E4%BB%AA%E8%A1%A8%E7%9B%98">[2]</a>。</li>
+<li><strong>用户操作路径</strong>：用户登录后进入仪表盘，查看概览；可点击卡片或导航跳转到具体功能页面（如点击“待处理任务”卡片进入任务列表）。前端加载时通过接口获取各项统计数据并渲染图表。</li>
+<li><strong>前后端交互</strong>：前端在加载时调用后端统计接口获取指标数据（如总样本数、分类分布等），并动态生成图表展示<a href="https://ppanel.dev/zh/admin/dashboard#:~:text=Dashboard%20%E4%BB%AA%E8%A1%A8%E7%9B%98">[2]</a>。点击卡片时可调用相应路由跳转并获取详细数据。</li>
+<li><strong>权限控制</strong>：视具体设计而定，一般普通用户可见自己的任务统计；管理员可见全局统计，并可能看到更多运营数据。</li>
+</ul>
+<p><a id="样本管理页面"></a>## 样本管理页面</p>
+<ul>
+<li><strong>功能定位</strong>：集中管理系统中的谣言样本（文本、链接等），支持增删改查。</li>
+<li><strong>主要内容</strong>：样本信息列表（表格），包含样本标题、摘要、来源、上传时间、标注状态等字段；可对样本进行搜索、过滤和分页。工具条提供“新增样本”、“导入数据”等操作按钮。</li>
+<li><strong>用户操作路径</strong>：用户（通常为管理员或数据管理员角色）进入该页查看样本列表；可以点击“新建/导入”上传样本，或点击某条记录进入样本详情页进行编辑；修改后保存并调用后端接口更新。</li>
+<li><strong>前后端交互</strong>：页面加载时通过 API 获取样本列表（GET），新增样本时提交表单调用后端创建接口（POST），编辑时调用更新接口（PUT/PATCH），删除时调用删除接口（DELETE）。状态更改后前端刷新列表数据。</li>
+<li><strong>权限控制</strong>：通常只有管理员或样本管理员可执行新增/删除操作；普通标注员可浏览或查看样本详情，权限可细分为只读或有限编辑。</li>
+</ul>
+<p><a id="任务分配页面"></a>## 任务分配页面</p>
+<ul>
+<li><strong>功能定位</strong>：用于将标注任务分配给用户，实现人机协同标注流程的任务调度部分。</li>
+<li><strong>主要内容</strong>：任务列表（表格），显示任务名称、样本总数、已标注数、分配状态等；支持按项目或事件创建新任务。表单用于配置新任务（选定样本集合、指派标注员/审核员、开启 AI 预标注、多人作业等）<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=1">[3]</a>。</li>
+<li><strong>用户操作路径</strong>：管理员或标注管理员进入页面，点击“创建任务”弹出配置表单，填写标注项、分配标注员及数量，选择是否启用 AI 预标注等<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E8%A1%A82%20%E6%A0%87%E6%B3%A8%E5%88%86%E9%85%8D%E4%B8%8E%E5%AE%A1%E6%A0%B8%E9%85%8D%E7%BD%AE">[4]</a><a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E9%80%89%E6%8B%A9%E6%A0%87%E6%B3%A8%E9%A1%B9%E4%B8%BA%E2%80%9C%E5%9B%BE%E7%89%87Caption%E2%80%9D%E4%B8%94%E5%BC%80%E5%90%AFAI%E9%A2%84%E6%A0%87%E6%B3%A8%E5%8A%9F%E8%83%BD%E6%97%B6%EF%BC%8C%E5%8F%AF%E8%AE%BE%E7%BD%AE%E4%BB%A5%E4%B8%8B%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F%E7%9A%84%E2%80%9C%E6%A0%87%E6%B3%A8%E8%A6%81%E6%B1%82%E2%80%9D%EF%BC%9A%20">[5]</a>。提交后调用后端接口生成任务，并向标注员推送标注通知。</li>
+<li><strong>前后端交互</strong>：提交创建任务表单时，前端调用后端接口（POST）创建新任务；页面加载任务列表时调用 GET 接口；对已有任务进行“移交”或“结束”等操作时调用相应接口更新任务状态<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E5%85%B6%E4%B8%AD%EF%BC%8C%E5%AF%B9%E4%BA%8E%E2%80%9C%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%E5%91%98%E2%80%9D%E8%A7%92%E8%89%B2%EF%BC%8C%E5%8F%AF%E5%8D%95%E5%87%BB%E2%80%9C%E6%A0%87%E6%B3%A8%E2%80%9D%E6%89%A7%E8%A1%8C%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%E4%BB%BB%E5%8A%A1%E3%80%82">[6]</a>。</li>
+<li><strong>权限控制</strong>：仅管理员、标注管理员角色可访问此页面并创建/分配任务<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E8%A7%92%E8%89%B2%E5%90%8D%E7%A7%B0">[7]</a>。普通标注员和审核员不可创建任务，但可在自己的任务列表中查看受指派的任务。</li>
+</ul>
+<p><a id="谣言检测与粗标注页面"></a>## 谣言检测与粗标注页面</p>
+<ul>
+<li><strong>功能定位</strong>：展示系统自动谣言检测和预标注结果，辅助用户初步判别和编辑。</li>
+<li><strong>主要内容</strong>：输入框或列表形式显示待检测文本及机器判定结果（如“真实/谣言”及置信度）<a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86">[8]</a>；可选择单条检测或批量导入文本进行自动判别。页面提供模型说明、检测按钮等。</li>
+<li><strong>用户操作路径</strong>：用户输入或粘贴文本后点击“检测”按钮，前端调用后端 BERT 模型接口，返回“真假”结果及置信度<a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86">[8]</a>。在列表模式下，用户可批量上传新样本，系统自动标注初步结果。用户可以对自动结果进行确认或修改，然后将样本添加到标注任务中。</li>
+<li><strong>前后端交互</strong>：前端调用后端文本检测 API（POST 文本内容），后端返回分类结果和置信度<a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86">[8]</a>。若用户采纳或修改结果，前端发送更新请求保存到样本数据库。生成新样本时还调用导入接口。</li>
+<li><strong>权限控制</strong>：一般所有登录用户可使用检测功能；但“机器预标注”功能的开启与否可能仅管理员可配置。粗标注结果可供后续标注任务使用。</li>
+</ul>
+<p><a id="人机协同标注页面"></a>## 人机协同标注页面</p>
+<ul>
+<li><strong>功能定位</strong>：标注员执行样本标注的核心界面，结合机器预标注与人工校正。</li>
+<li><strong>主要内容</strong>：标注任务列表，显示分配给当前用户的所有任务。进入具体任务后，显示单条样本内容（文本或图片）和系统给出的预标注结果（如文本分类标签或实体高亮）。页面提供标注工具（如标签选择、文本高亮工具、复选框等）和提交按钮。界面通常包含“上一个/下一个”导航和标注进度统计。</li>
+<li><strong>用户操作路径</strong>：标注员在任务列表页选择一个任务后，进入标注作业界面。逐条查看样本内容，参考机器预标注，选择或修改标签等操作。完成一条标注后点击“提交”保存并加载下一条<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E5%85%B6%E4%B8%AD%EF%BC%8C%E5%AF%B9%E4%BA%8E%E2%80%9C%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%E5%91%98%E2%80%9D%E8%A7%92%E8%89%B2%EF%BC%8C%E5%8F%AF%E5%8D%95%E5%87%BB%E2%80%9C%E6%A0%87%E6%B3%A8%E2%80%9D%E6%89%A7%E8%A1%8C%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%E4%BB%BB%E5%8A%A1%E3%80%82">[6]</a>。当所有条目标注完成后，显示任务完成提示，并调用后端更新任务状态。</li>
+<li><strong>前后端交互</strong>：进入标注界面时，前端通过接口（GET）拉取当前样本数据及预标注结果。每次提交标注结果时，前端调用后端接口（POST/PUT）保存标注数据，并更新该样本/任务的状态<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E5%85%B6%E4%B8%AD%EF%BC%8C%E5%AF%B9%E4%BA%8E%E2%80%9C%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%E5%91%98%E2%80%9D%E8%A7%92%E8%89%B2%EF%BC%8C%E5%8F%AF%E5%8D%95%E5%87%BB%E2%80%9C%E6%A0%87%E6%B3%A8%E2%80%9D%E6%89%A7%E8%A1%8C%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%E4%BB%BB%E5%8A%A1%E3%80%82">[6]</a>。如果启用多人协作，可调用接口移交任务或合并标注。</li>
+<li><strong>权限控制</strong>：仅分配到该任务的标注员可访问对应标注界面<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E8%A7%92%E8%89%B2%E5%90%8D%E7%A7%B0">[7]</a>。管理员或标注管理员可查看所有任务标注页面，且可能拥有“审核员”权限。</li>
+</ul>
+<p><a id="标注审核页面"></a>## 标注审核页面</p>
+<ul>
+<li><strong>功能定位</strong>：审核员对已标注数据进行复审，确保标注质量。</li>
+<li><strong>主要内容</strong>：审核任务列表，显示指派给当前审核员的审核作业。进入审核界面后，展示标注员已提交的样本标注结果，并提供审核意见输入框、驳回原因及“通过/不通过”按钮。界面也可统计已审核条目数量和待审核量。</li>
+<li><strong>用户操作路径</strong>：审核员在列表中选择任务进入审核页面，一条条查看标注结果，点击“通过”或“不通过”，若不通过可填写原因并将样本退回给标注员修改<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=5">[9]</a><a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=">[10]</a>。完成所有审核后，提交审核结果更新任务状态。</li>
+<li><strong>前后端交互</strong>：前端获取审核任务数据（GET），提交审核决定时调用后端接口（POST/PUT）更新样本状态及审核记录<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=">[10]</a>。审核完成后，若任务配置为多人审核，前端可调用生成/发布接口生成最终数据集。</li>
+<li><strong>权限控制</strong>：仅审核员角色可访问该页面<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E8%A7%92%E8%89%B2%E5%90%8D%E7%A7%B0">[7]</a>。未开启审核功能时，该模块隐藏或不可用。</li>
+</ul>
+<p><a id="事件聚合页面"></a>## 事件聚合页面</p>
+<ul>
+<li><strong>功能定位</strong>：对标注后的谣言样本进行聚类与合并，将相关样本归为同一“事件”，帮助分析谣言主题<a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E8%99%9A%E5%81%87%E6%96%B0%E9%97%BB%E4%B8%BB%E9%A2%98%E8%81%9A%E7%B1%BB%EF%BC%88%E5%8A%9B%E5%AF%BC%E5%90%91%E5%9B%BE%EF%BC%89">[11]</a>。</li>
+<li><strong>主要内容</strong>：事件列表或可视化聚类图，展示系统自动聚合出的谣言事件（每个事件包含多条相关样本）。可通过列表查看事件名称、样本数量、标签类别等；可通过图表（如力导向图）直观显示事件间关系和内部结构<a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E8%99%9A%E5%81%87%E6%96%B0%E9%97%BB%E4%B8%BB%E9%A2%98%E8%81%9A%E7%B1%BB%EF%BC%88%E5%8A%9B%E5%AF%BC%E5%90%91%E5%9B%BE%EF%BC%89">[11]</a>。事件详情页列出该事件包含的所有样本和各自标注，支持人工合并/拆分事件。</li>
+<li><strong>用户操作路径</strong>：用户打开事件聚合页面查看现有事件，点击某事件进入其详情查看样本。可对事件进行编辑：添加/移除样本、重命名事件、调整事件标签等操作。系统自动聚类结果可作为初始值，用户可人工微调。</li>
+<li><strong>前后端交互</strong>：前端从后端获取事件聚合数据（GET），包括每个事件的样本列表和标签统计。对事件的任何修改（合并事件、更新标签）由前端调用后端接口（PUT/DELETE/POST）同步更新。可调用后端聚类算法接口重新计算事件聚合。</li>
+<li><strong>权限控制</strong>：一般所有标注员可查看事件和提交合并建议；仅管理员或审核员可执行事件编辑和最终合并操作。</li>
+</ul>
+<p><a id="导出与报表页面"></a>## 导出与报表页面</p>
+<ul>
+<li><strong>功能定位</strong>：将标注数据导出为报表或文件，用于离线分析或其他系统使用。</li>
+<li><strong>主要内容</strong>：导出选项界面，包括数据范围（如所有样本、某任务、某事件）、导出格式（CSV、Excel、JSON等）选择、字段筛选条件、语言等。显示可导出数据量预估，并提供“导出”按钮。可另设制式报表（如按日统计、按标签统计）下载。</li>
+<li><strong>用户操作路径</strong>：用户在该页设置导出条件（选择时间区间、任务/事件、是否包含机器标签等），点击“导出”后前端向后端请求生成文件或直接获取文件流。导出完成后，前端提示并提供文件下载链接。</li>
+<li><strong>前后端交互</strong>：前端调用后端导出接口（GET/POST），后端根据条件查询数据并生成文件，返回文件下载地址或直接推送文件流。前端接收后触发下载。</li>
+<li><strong>权限控制</strong>：通常限管理员或数据分析角色访问；普通标注员可能只能导出其参与标注的数据。</li>
+</ul>
+<p><a id="多语言支持"></a>## 多语言支持</p>
+<ul>
+<li><strong>功能定位</strong>：提供界面文本的多语言切换，满足国际化需求。</li>
+<li><strong>主要内容</strong>：页面右上角或导航栏中的语言切换器（下拉菜单），列出支持的语言选项（如中文、英文等）。所有页面文本内容通过 Vue-i18n 等国际化方案加载对应语言资源。</li>
+<li><strong>用户操作路径</strong>：用户在任何页面通过语言切换组件更换界面语言，前端即时更新界面文本显示；并可刷新后仍保持所选语言（存储在用户偏好或 Cookie 中）。</li>
+<li><strong>前后端交互</strong>：主要在前端实现，无需额外后端接口；语言包在前端项目中维护，使用 vue-i18n 等插件加载资源<a href="https://blog.csdn.net/A15029296293/article/details/140438866#:~:text=%E4%B9%8B%E5%89%8D%E6%9C%89%E5%9C%A8react%E4%B8%AD%E4%BB%8B%E7%BB%8D%E8%BF%87%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8i18n%E5%8E%BB%E5%AE%9E%E7%8E%B0%E5%9B%BD%E9%99%85%E5%8C%96%EF%BC%8C%E9%82%A3%E4%B9%88%EF%BC%8C%E5%9C%A8vue%E9%87%8C%E6%83%B3%E8%A6%81%E5%AE%9E%E7%8E%B0%E5%9B%BD%E9%99%85%E5%8C%96%E4%B8%80%E8%88%AC%E4%B9%9F%E9%9C%80%E8%A6%81%E7%94%A8%E5%88%B0i18n%E8%BF%99%E4%B8%AA%E5%BA%93%EF%BC%8C%E6%8E%A5%E4%B8%8B%E6%9D%A5%E4%BB%8B%E7%BB%8D%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93%E3%80%82">[12]</a>。必要时，可调用后端获取多语言内容（如标签说明、帮助文档等）。</li>
+<li><strong>权限控制</strong>：对所有用户开放。</li>
+</ul>
+<p><a id="系统设置与用户管理"></a>## 系统设置与用户管理</p>
+<ul>
+<li><strong>功能定位</strong>：管理员配置系统参数、管理用户账号与权限。</li>
+<li><strong>主要内容</strong>：用户管理子页面：用户列表（表格），包含用户名、角色、状态等，提供新增/编辑/删除用户表单；角色权限设置表单；全局系统配置页（如语言默认值、模型参数）。</li>
+<li><strong>用户操作路径</strong>：管理员进入用户管理，点击新增按钮填写新用户信息并分配角色，前端调用后端注册接口创建用户。编辑用户时修改其角色和状态。系统设置页可修改系统标题、分页大小等配置，保存时调用接口更新系统配置。</li>
+<li><strong>前后端交互</strong>：前端通过 API 获取/提交用户及设置数据（GET/POST/PUT/DELETE）。如启用日志审计，前端页面也可请求日志接口。</li>
+<li><strong>权限控制</strong>：仅超级管理员或系统管理员可访问此模块<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E8%A7%92%E8%89%B2%E5%90%8D%E7%A7%B0">[7]</a>；普通用户无法进入此页面。</li>
+</ul>
+<p>__参考资料：__典型管理后台仪表盘设计思路<a href="https://ppanel.dev/zh/admin/dashboard#:~:text=Dashboard%20%E4%BB%AA%E8%A1%A8%E7%9B%98">[2]</a>、数据标注任务流程设计<a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E6%95%B0%E6%8D%AE%E6%A0%87%E6%B3%A8%E5%8A%9F%E8%83%BD%E6%94%AF%E6%8C%81%E5%88%9B%E5%BB%BA%E6%A0%87%E6%B3%A8%E4%BB%BB%E5%8A%A1%E3%80%81%E6%A0%87%E6%B3%A8%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%88%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%EF%BC%89%E3%80%81%E5%AE%A1%E6%A0%B8%E6%A0%87%E6%B3%A8%E5%90%8E%E7%9A%84%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%88%E5%AE%A1%E6%A0%B8%E4%BD%9C%E4%B8%9A%EF%BC%89%E4%B8%8E%E7%AE%A1%E7%90%86%E6%A0%87%E6%B3%A8%E4%BB%BB%E5%8A%A1%EF%BC%88%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86%EF%BC%89%E3%80%82%E5%85%B6%E4%B8%AD%EF%BC%8C%E4%B8%8D%E5%90%8C%E8%A7%92%E8%89%B2%E6%9D%83%E9%99%90%E6%94%AF%E6%8C%81%E7%9A%84%E5%8A%9F%E8%83%BD%E5%8F%8A%E5%B1%95%E7%A4%BA%E7%9A%84%E5%89%8D%E7%AB%AF%E7%95%8C%E9%9D%A2%E7%95%A5%E6%9C%89%20%E5%B7%AE%E5%BC%82%EF%BC%8C%E8%AF%A6%E8%A7%81%E8%A1%A81%E3%80%82">[13]</a><a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E8%A7%92%E8%89%B2%E5%90%8D%E7%A7%B0">[7]</a>、Vue3 国际化实现方法<a href="https://blog.csdn.net/A15029296293/article/details/140438866#:~:text=%E4%B9%8B%E5%89%8D%E6%9C%89%E5%9C%A8react%E4%B8%AD%E4%BB%8B%E7%BB%8D%E8%BF%87%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8i18n%E5%8E%BB%E5%AE%9E%E7%8E%B0%E5%9B%BD%E9%99%85%E5%8C%96%EF%BC%8C%E9%82%A3%E4%B9%88%EF%BC%8C%E5%9C%A8vue%E9%87%8C%E6%83%B3%E8%A6%81%E5%AE%9E%E7%8E%B0%E5%9B%BD%E9%99%85%E5%8C%96%E4%B8%80%E8%88%AC%E4%B9%9F%E9%9C%80%E8%A6%81%E7%94%A8%E5%88%B0i18n%E8%BF%99%E4%B8%AA%E5%BA%93%EF%BC%8C%E6%8E%A5%E4%B8%8B%E6%9D%A5%E4%BB%8B%E7%BB%8D%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93%E3%80%82">[12]</a>、谣言检测系统功能概述<a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86">[8]</a><a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E8%99%9A%E5%81%87%E6%96%B0%E9%97%BB%E4%B8%BB%E9%A2%98%E8%81%9A%E7%B1%BB%EF%BC%88%E5%8A%9B%E5%AF%BC%E5%90%91%E5%9B%BE%EF%BC%89">[11]</a>等。</p>
+<p><a id="citations"></a><a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=%E6%8A%80%E6%9C%AF%E6%A0%88">[1]</a> <a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%8E%E5%90%8E%E5%8F%B0%E7%AE%A1%E7%90%86">[8]</a> <a href="https://blog.csdn.net/qq_53846367/article/details/150395988#:~:text=,%E8%99%9A%E5%81%87%E6%96%B0%E9%97%BB%E4%B8%BB%E9%A2%98%E8%81%9A%E7%B1%BB%EF%BC%88%E5%8A%9B%E5%AF%BC%E5%90%91%E5%9B%BE%EF%BC%89">[11]</a> 277-基于Python的虚假新闻检测可视化分析系统_判断一篇文章是否为谣言api-CSDN博客</p>
+<p><a href="https://blog.csdn.net/qq_53846367/article/details/150395988">https://blog.csdn.net/qq_53846367/article/details/150395988</a></p>
+<p><a href="https://ppanel.dev/zh/admin/dashboard#:~:text=Dashboard%20%E4%BB%AA%E8%A1%A8%E7%9B%98">[2]</a> Dashboard 仪表盘 | PPanel</p>
+<p><a href="https://ppanel.dev/zh/admin/dashboard">https://ppanel.dev/zh/admin/dashboard</a></p>
+<p><a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=1">[3]</a> <a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E8%A1%A82%20%E6%A0%87%E6%B3%A8%E5%88%86%E9%85%8D%E4%B8%8E%E5%AE%A1%E6%A0%B8%E9%85%8D%E7%BD%AE">[4]</a> <a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E9%80%89%E6%8B%A9%E6%A0%87%E6%B3%A8%E9%A1%B9%E4%B8%BA%E2%80%9C%E5%9B%BE%E7%89%87Caption%E2%80%9D%E4%B8%94%E5%BC%80%E5%90%AFAI%E9%A2%84%E6%A0%87%E6%B3%A8%E5%8A%9F%E8%83%BD%E6%97%B6%EF%BC%8C%E5%8F%AF%E8%AE%BE%E7%BD%AE%E4%BB%A5%E4%B8%8B%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F%E7%9A%84%E2%80%9C%E6%A0%87%E6%B3%A8%E8%A6%81%E6%B1%82%E2%80%9D%EF%BC%9A%20">[5]</a> <a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E5%85%B6%E4%B8%AD%EF%BC%8C%E5%AF%B9%E4%BA%8E%E2%80%9C%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%E5%91%98%E2%80%9D%E8%A7%92%E8%89%B2%EF%BC%8C%E5%8F%AF%E5%8D%95%E5%87%BB%E2%80%9C%E6%A0%87%E6%B3%A8%E2%80%9D%E6%89%A7%E8%A1%8C%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%E4%BB%BB%E5%8A%A1%E3%80%82">[6]</a> <a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E8%A7%92%E8%89%B2%E5%90%8D%E7%A7%B0">[7]</a> <a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=5">[9]</a> <a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=">[10]</a> <a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html#:~:text=%E6%95%B0%E6%8D%AE%E6%A0%87%E6%B3%A8%E5%8A%9F%E8%83%BD%E6%94%AF%E6%8C%81%E5%88%9B%E5%BB%BA%E6%A0%87%E6%B3%A8%E4%BB%BB%E5%8A%A1%E3%80%81%E6%A0%87%E6%B3%A8%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%88%E6%A0%87%E6%B3%A8%E4%BD%9C%E4%B8%9A%EF%BC%89%E3%80%81%E5%AE%A1%E6%A0%B8%E6%A0%87%E6%B3%A8%E5%90%8E%E7%9A%84%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%88%E5%AE%A1%E6%A0%B8%E4%BD%9C%E4%B8%9A%EF%BC%89%E4%B8%8E%E7%AE%A1%E7%90%86%E6%A0%87%E6%B3%A8%E4%BB%BB%E5%8A%A1%EF%BC%88%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86%EF%BC%89%E3%80%82%E5%85%B6%E4%B8%AD%EF%BC%8C%E4%B8%8D%E5%90%8C%E8%A7%92%E8%89%B2%E6%9D%83%E9%99%90%E6%94%AF%E6%8C%81%E7%9A%84%E5%8A%9F%E8%83%BD%E5%8F%8A%E5%B1%95%E7%A4%BA%E7%9A%84%E5%89%8D%E7%AB%AF%E7%95%8C%E9%9D%A2%E7%95%A5%E6%9C%89%20%E5%B7%AE%E5%BC%82%EF%BC%8C%E8%AF%A6%E8%A7%81%E8%A1%A81%E3%80%82">[13]</a> 标注图片类数据集_加工图片类数据集_加工数据集_使用数据工程构建数据集_用户指南_盘古大模型 PanguLargeModels-华为云</p>
+<p><a href="https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html">https://support.huaweicloud.com/usermanual-pangulm/pangulm_04_0223.html</a></p>
+<p><a href="https://blog.csdn.net/A15029296293/article/details/140438866#:~:text=%E4%B9%8B%E5%89%8D%E6%9C%89%E5%9C%A8react%E4%B8%AD%E4%BB%8B%E7%BB%8D%E8%BF%87%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8i18n%E5%8E%BB%E5%AE%9E%E7%8E%B0%E5%9B%BD%E9%99%85%E5%8C%96%EF%BC%8C%E9%82%A3%E4%B9%88%EF%BC%8C%E5%9C%A8vue%E9%87%8C%E6%83%B3%E8%A6%81%E5%AE%9E%E7%8E%B0%E5%9B%BD%E9%99%85%E5%8C%96%E4%B8%80%E8%88%AC%E4%B9%9F%E9%9C%80%E8%A6%81%E7%94%A8%E5%88%B0i18n%E8%BF%99%E4%B8%AA%E5%BA%93%EF%BC%8C%E6%8E%A5%E4%B8%8B%E6%9D%A5%E4%BB%8B%E7%BB%8D%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E8%BF%99%E4%B8%AA%E5%BA%93%E3%80%82">[12]</a> 在vue3中通过vue-i18n实现国际化多语言切换_vue3 i18n 切换语言-CSDN博客</p>
+<p><a href="https://blog.csdn.net/A15029296293/article/details/140438866">https://blog.csdn.net/A15029296293/article/details/140438866</a></p>

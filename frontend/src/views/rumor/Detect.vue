@@ -43,11 +43,12 @@ const handleDetect = async () => {
   if (!text.value) return
   loading.value = true
   try {
-    // Mock response
-    await new Promise(r => setTimeout(r, 1000))
+    const res: any = await rumorService.detect(text.value)
+    const data = res?.data?.data || res?.data
+    const confidence = data?.confidence ?? 0
     result.value = {
-      label: Math.random() > 0.5 ? 'Rumor' : 'Real',
-      confidence: (Math.random() * 10 + 90).toFixed(2)
+      label: data?.label,
+      confidence: (Number(confidence) * 100).toFixed(2)
     }
     ElMessage.success('Detection Complete')
   } catch (e) {
