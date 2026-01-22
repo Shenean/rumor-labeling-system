@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS tasks (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '任务ID',
+    name VARCHAR(100) NOT NULL COMMENT '任务名称',
+    description TEXT COMMENT '任务描述',
+    assignee_id INT COMMENT '指派执行用户ID (外键, 选填)',
+    status VARCHAR(20) DEFAULT 'pending' COMMENT '任务状态 (如 pending / done)',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    FOREIGN KEY (assignee_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='任务表';

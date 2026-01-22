@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '用户ID',
+    username VARCHAR(50) NOT NULL UNIQUE COMMENT '登录用户名 (唯一)',
+    password_hash VARCHAR(128) NOT NULL COMMENT '密码哈希值',
+    email VARCHAR(100) COMMENT '邮件地址 (可选)',
+    role VARCHAR(20) DEFAULT 'annotator' COMMENT '用户角色 (如 admin / annotator)',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
