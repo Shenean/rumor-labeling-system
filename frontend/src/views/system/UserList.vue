@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 import { settingsService } from '@/services/modules'
 
 const users = ref<any[]>([])

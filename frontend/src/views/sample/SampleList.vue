@@ -59,6 +59,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 import { sampleService } from '@/services/modules'
 
 const search = ref('')

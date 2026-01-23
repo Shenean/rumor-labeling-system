@@ -26,6 +26,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 import { settingsService } from '@/services/modules'
 
 const loading = ref({ config: false, save: false, logs: false })
@@ -76,4 +77,3 @@ onMounted(() => {
   fetchLogs()
 })
 </script>
-

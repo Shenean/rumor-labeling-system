@@ -58,6 +58,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { Aim, Connection, Document, EditPen, Finished, Odometer, Setting, Tickets } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const userStore = useUserStore()

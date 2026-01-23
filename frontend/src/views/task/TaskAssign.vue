@@ -44,6 +44,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 import { sampleService, settingsService, taskService } from '@/services/modules'
 
 const tasks = ref<any[]>([])
@@ -131,4 +132,3 @@ onMounted(() => {
   fetchSamples()
 })
 </script>
-

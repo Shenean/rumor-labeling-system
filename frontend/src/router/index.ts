@@ -101,6 +101,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  void from
   const userStore = useUserStore()
   if (to.meta.public) {
     next()

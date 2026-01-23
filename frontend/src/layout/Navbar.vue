@@ -9,7 +9,7 @@
     <div class="right">
       <el-dropdown @command="handleLangCommand">
         <span class="el-dropdown-link">
-          Language<el-icon class="el-icon--right"><arrow-down /></el-icon>
+          Language<el-icon class="el-icon--right"><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -22,7 +22,7 @@
       <el-dropdown @command="handleUserCommand" style="margin-left: 20px;">
         <span class="el-dropdown-link">
           {{ userStore.userInfo.username || 'User' }}
-          <el-icon class="el-icon--right"><arrow-down /></el-icon>
+          <el-icon class="el-icon--right"><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
           <el-dropdown-menu>
@@ -38,6 +38,7 @@
 import { useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { useI18n } from 'vue-i18n'
+import { ArrowDown } from '@element-plus/icons-vue'
 
 const route = useRoute()
 const userStore = useUserStore()

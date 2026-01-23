@@ -34,6 +34,7 @@
 import { ref } from 'vue'
 import { rumorService } from '@/services/modules'
 import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 
 const text = ref('')
 const loading = ref(false)

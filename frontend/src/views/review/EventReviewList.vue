@@ -23,6 +23,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 import api from '@/services/api'
 
 const router = useRouter()
@@ -50,4 +51,3 @@ onMounted(() => {
   fetchEvents()
 })
 </script>
-
